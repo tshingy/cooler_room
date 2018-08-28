@@ -1,4 +1,4 @@
-   const char MAIN_page[] PROGMEM = R"=====(
+const char MAIN_page[] PROGMEM = R"=====(
 <!DOCTYPE html><html><head><meta content='width=device-width, initial-scale=1' name='viewport'/><title>Cooler Room Status</title>
   <style>
   .divTable{
@@ -100,4 +100,4 @@
     </script>
 
     </body></html>
-	)=====";
+)=====";
