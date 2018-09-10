@@ -1,4 +1,4 @@
-const char MAIN_page[] PROGMEM = R"=====(
+   const char MAIN_page[] PROGMEM = R"=====(
 <!DOCTYPE html><html><head><meta content='width=device-width, initial-scale=1' name='viewport'/><title>Cooler Room Status</title>
   <style>
   .divTable{
@@ -67,11 +67,11 @@ const char MAIN_page[] PROGMEM = R"=====(
       <div class="divTableBody">
         <div class="divTableRow">
           <div class="divTableCell" style="text-align: right;">Set Room Temp</div>
-          <div class="divTableCell" style="text-align: left;"><input type="number" name="set_room" id="set_room" style="width:50px;" /></div>
+          <div class="divTableCell" style="text-align: left;"><input type="number" name="set_room" id="set_room" min="32" style="width:50px;" /></div>
         </div>
         <div class="divTableRow">
           <div class="divTableCell" style="text-align: right;">Min AC Temp</div>
-          <div class="divTableCell" style="text-align: left;"><input type="number" name="set_ac" id="set_ac" style="width:50px;" /></div>
+          <div class="divTableCell" style="text-align: left;"><input type="number" name="set_ac" id="set_ac" min="32" style="width:50px;" /></div>
         </div>
         <div class="divTableRow">
           <div class="divTableCell" style="text-align: right;"><input type="submit" value="Save" style="font-size: 0.75em; /></div>
@@ -100,4 +100,4 @@ const char MAIN_page[] PROGMEM = R"=====(
     </script>
 
     </body></html>
-)=====";
+	)=====";
