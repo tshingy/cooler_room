@@ -17,20 +17,21 @@ DeviceAddress AC = { 0x28, 0xFD, 0x02, 0x3B, 0x1A, 0x13, 0x01, 0xBE };    // DS1
 DeviceAddress Room = { 0x28, 0x71, 0x7D, 0x2F, 0x1A, 0x13, 0x01, 0x1D };
 
 int heaterPin = 0;    // pin for heater on NodeMCU
-int heaterOff = 0;    // pin signal
-int heaterOn = 1023;  // pin signal
+int heaterOff = 1023;    // pin signal
+int heaterOn = 0;  // pin signal
 
 // Hard coded temperatures. Values can be change with web interface
 float roomMin = 45.00;
 float acMin = 35.00;
 
+bool firstRun = true;
 
 float room, ac;
 String heaterStatus = "OFF";
 
 // Time interval values
 long previousMillis = 0;
-long interval = 5000;
+long interval = 600000;
 
 // HTML to auto update temperature sensors value
 const String s0 = "<div style=\"margin-bottom: 20px; text-align: center; font-size: 2.5em; text-decoration: underline;\">HEATER ";
@@ -50,12 +51,14 @@ void handleRoot() {
 void setValue() {
 
   if (server.arg("set_room") != ""){
-  double h = server.arg("set_room").toFloat();
-  roomMin = h;
+    double h = server.arg("set_room").toFloat();
+    roomMin = h;
+    previousMillis -= interval;
     }
   if (server.arg("set_ac") != "") {
-  double a = server.arg("set_ac").toFloat();
-  acMin = a;
+    double a = server.arg("set_ac").toFloat();
+    acMin = a;
+    previousMillis -= interval;
   }
   server.send(200, "text/html", s);
 }
@@ -67,7 +70,8 @@ void updating() {
   text += s3 + String(roomMin);
   text += s4 + String(acMin);
   text += s5;
-    server.send(200, "text/html", text);
+  
+  server.send(200, "text/html", text);
 }
 
 void setup() {
@@ -80,7 +84,10 @@ void setup() {
    * IP Address and access it from Computer or Smartphone.
   */
   WiFiManager wifiManager;
-  wifiManager.autoConnect("CoolerRoom WiFi Setup");
+  WiFi.hostname("CoolerRoom");
+  wifiManager.setAPStaticIPConfig(IPAddress(10,0,1,1), IPAddress(10,0,1,1), IPAddress(255,255,255,0));
+  wifiManager.autoConnect("CoolerRoom Setup");
+ 
   
   Serial.println();
   Serial.print("Connected, IP address: ");
@@ -102,13 +109,23 @@ void setup() {
 }
 
 void loop() {
-  
   server.handleClient();
 
   sensors.requestTemperatures();  // retrieve temperature
   room = getTemperature(Room);
   ac = getTemperature(AC);
 
+  if (firstRun){
+    if (room < roomMin || ac < acMin) {   // turn heater off if room or ac temp is reached
+      heaterStatus = "OFF";
+      analogWrite(heaterPin, heaterOff);
+    } else {    // turn on heater if room or ac temp not reached
+      heaterStatus = "ON";
+      analogWrite(heaterPin, heaterOn);
+    }
+    firstRun = false;
+  }
+  
   unsigned long currentMillis = millis();
   if (currentMillis - previousMillis > interval) {    // how often to check temperature fluctuations
     previousMillis = currentMillis;
@@ -120,6 +137,8 @@ void loop() {
       heaterStatus = "ON";
       analogWrite(heaterPin, heaterOn);
     }
+  } else if (ac < acMin) {
+    analogWrite(heaterPin, heaterOff);
   }
 }
 
